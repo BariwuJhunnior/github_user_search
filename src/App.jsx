@@ -30,12 +30,11 @@ function App() {
     try {
       const data = await fetchUserData(searchParams, page);
 
-      //Update the results: append new results if loading more
+      //Append new results if loading more
       setUsers((prevUsers) =>
         page === 1 ? data.items : [...(prevUsers || []), ...data.items],
       );
 
-      //Save the total number of users found
       setTotalCount(data.total_count);
       setCurrentPage(page);
     } catch (error) {
@@ -45,9 +44,7 @@ function App() {
     }
   };
 
-  //NEW FUNCTION for the "Load More" button
   const handleLoadMore = () => {
-    //Search again using the last saved parameters, incrementing the page number
     handleSearch(lastSearchParams, currentPage + 1);
   };
 
@@ -64,11 +61,11 @@ function App() {
                 users={users}
                 isLoading={isLoading}
                 error={error}
-                totalCount={totalCount} //Pass Count down
+                totalCount={totalCount}
                 currentPage={currentPage}
                 searchTerm={searchTerm}
                 handleSearch={handleSearch}
-                handleLoadMore={handleLoadMore} //Pass load more handler down
+                handleLoadMore={handleLoadMore}
               />
             }
           />

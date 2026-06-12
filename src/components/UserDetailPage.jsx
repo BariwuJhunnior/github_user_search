@@ -23,7 +23,7 @@ const RepoItem = ({ repo }) => (
   </div>
 );
 
-//Helper Component: Profile Card ----
+//Component: Profile Card
 const ProfileCard = ({ profile }) => (
   <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col md:flex-row items-start md:space-x-8">
     <img
@@ -62,19 +62,16 @@ const UserDetailPage = () => {
   //Extract the dynamic URL parameter (the username)
   const { username } = useParams();
 
-  //State management for the data and status
   const [userProfile, setUserProfile] = useState(null);
   const [repositories, setRepositories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  //Use useCallback to memoize the function, avoiding unneccessary re-renders
   const fetchData = useCallback(async (user) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      //Use Promise.all to fetch profile and repos simultaneiously
       const [profileData, reposData] = await Promise.all([
         fetchUserProfile(user),
         fetchUserRepos(user),
@@ -87,7 +84,7 @@ const UserDetailPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []); //Empty dependency array means this function never changes
+  }, []);
 
   useEffect(() => {
     if (username) {
@@ -95,7 +92,6 @@ const UserDetailPage = () => {
     }
   }, [username, fetchData]);
 
-  //-- Conditional Rendering --
   if (isLoading) {
     return (
       <div className="p-8 text-center">
@@ -115,13 +111,10 @@ const UserDetailPage = () => {
     );
   }
 
-  // -- Final Success Display --
   return (
     <div className="p-8  space-y-8 bg-gray-50 min-h-screen">
-      {/* 1. Profile Card */}
       <ProfileCard profile={userProfile} />
 
-      {/* 2. Repositories List */}
       <div className="bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-2xl font-bold mb-4 border-b pb-2 text-gray-800">
           Top {repositories.length} Public Repositories

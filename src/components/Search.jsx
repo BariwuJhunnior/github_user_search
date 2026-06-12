@@ -6,7 +6,7 @@ function UserCard({ user }) {
   if (!user) return null;
 
   const [followers, setFollowers] = useState(
-    typeof user.followers === "number" ? user.followers : null
+    typeof user.followers === "number" ? user.followers : null,
   );
 
   useEffect(() => {
@@ -23,9 +23,8 @@ function UserCard({ user }) {
     return () => {
       mounted = false;
     };
-  }, [user.login]);
+  }, [user.login, followers]);
 
-  // Display logic is contained right here
   return (
     <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white hover:shadow-lg transition duration-200">
       <div className="flex items-center space-x-4">
@@ -36,15 +35,12 @@ function UserCard({ user }) {
         />
         <div>
           <h3 className="text-xl font-semibold text-blue-600">{user.login}</h3>
-          <p className="text-sm text-gray-500">Followers: {followers !== null ? followers : '—'}</p>
+          <p className="text-sm text-gray-500">
+            Followers: {followers !== null ? followers : "—"}
+          </p>
         </div>
       </div>
 
-      {/* We need another API call to get 'location' and 'public_repos' 
-          since the search API only returns summary data. 
-          For now, we'll display the login and link. 
-          The next assignment can focus on 'fetching full profile'.
-      */}
       <div className="mt-3">
         <a
           href={user.html_url}
@@ -81,7 +77,7 @@ export function SearchPage({
     </div>
   );
 
-  //Conditional rendering logic for results section
+  //Results section
   let content;
 
   if (isLoading && users.length === 0) {
@@ -91,7 +87,6 @@ export function SearchPage({
   } else if (users.length > 0) {
     content = userList;
   } else if (!isLoading && totalCount === 0) {
-    //Only show this if a search has been attempted(i.e., totalCount is 0 after a search)
     content = (
       <p className="text-center text-gray-500 mt-8">
         No users found matching your criteria.
@@ -105,7 +100,6 @@ export function SearchPage({
     );
   }
 
-  //Determine if the "Load More" button should be visible
   const showLoadMore = users.length > 0 && users.length < totalCount;
 
   return (
@@ -142,7 +136,7 @@ export function SearchPage({
 
         {content}
 
-        {/* Load More Button Logic */}
+        {/* Load More Button  */}
         {showLoadMore && (
           <div className="flex justify-center mt-6">
             <button
@@ -159,10 +153,6 @@ export function SearchPage({
   );
 }
 
-// ----------------------------------------------------------------------
-// THE MAIN COMPONENT HANDLING EVERYTHING
-// ----------------------------------------------------------------------
-
 function Search({ onSearch, isLoading }) {
   const initialSearchState = {
     keyword: "",
@@ -172,7 +162,7 @@ function Search({ onSearch, isLoading }) {
 
   const [formData, setFormData] = useState(initialSearchState);
 
-  // 4. Form Submission Handler
+  //Form Submission Handler
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -181,7 +171,6 @@ function Search({ onSearch, isLoading }) {
     }
   };
 
-  // Universal handler for all inputs
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -192,7 +181,6 @@ function Search({ onSearch, isLoading }) {
 
   return (
     <div className="search-app-container">
-      {/* Input Form */}
       <form
         onSubmit={handleSubmit}
         className="p-4 bg-gray-100 rounded-lg shadow-md mb-6"
@@ -256,7 +244,7 @@ function Search({ onSearch, isLoading }) {
           </div>
         </div>
 
-        {/* Submit Button (Full width on small screens, grouped on large) */}
+        {/* Submit Button */}
         <div className="mt-4 md:mt-0 md:col-span-4 flex justify-end">
           <button
             type="submit"
