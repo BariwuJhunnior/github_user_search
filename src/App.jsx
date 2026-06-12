@@ -14,8 +14,6 @@ function App() {
   const [lastSearchParams, setLastSearchParams] = useState({});
   const [totalCount, setTotalCount] = useState(0);
 
-  const date = new Date().getFullYear();
-
   const handleSearch = async (searchParams, page = 1) => {
     setSearchTerm(searchParams);
     setError(null);
@@ -75,7 +73,7 @@ function App() {
       </BrowserRouter>
 
       <footer>
-        <p>&copy; {date} GitHub Search App</p>
+        <p>&copy; 2025 GitHub User Search Application</p>
       </footer>
     </div>
   );
