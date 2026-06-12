@@ -1,19 +1,33 @@
-import { useState } from "react";
-import axios from "axios";
-
-// Access the environment variable (must be done in this file now)
-const GITHUB_API_BASE_URL = import.meta.env.VITE_APP_GITHUB_API_BASE_URL;
+import { useState, useEffect } from "react";
+import { fetchUserProfile } from "../services/githubService";
 
 // --- Helper Component (kept inside for simplicity, still bad practice) ---
 function UserCard({ user }) {
   if (!user) return null;
 
+  const [followers, setFollowers] = useState(
+    typeof user.followers === "number" ? user.followers : null
+  );
+
+  useEffect(() => {
+    let mounted = true;
+    if (followers === null) {
+      fetchUserProfile(user.login)
+        .then((data) => {
+          if (mounted && typeof data.followers === "number") {
+            setFollowers(data.followers);
+          }
+        })
+        .catch(() => {});
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [user.login]);
+
   // Display logic is contained right here
   return (
-    <div
-      key={user.id}
-      className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white hover:shadow-lg transition duration-200"
-    >
+    <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white hover:shadow-lg transition duration-200">
       <div className="flex items-center space-x-4">
         <img
           src={user.avatar_url}
@@ -22,9 +36,7 @@ function UserCard({ user }) {
         />
         <div>
           <h3 className="text-xl font-semibold text-blue-600">{user.login}</h3>
-          <p className="text-sm text-gray-500">
-            Score: {user.score.toFixed(2)}
-          </p>
+          <p className="text-sm text-gray-500">Followers: {followers !== null ? followers : '—'}</p>
         </div>
       </div>
 
@@ -58,10 +70,12 @@ export function SearchPage({
   totalCount,
   handleLoadMore,
 }) {
+  const topUser = users?.length > 0 ? users[0] : null;
+
   //Renders the list of UserCard components
   const userList = (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-      {users.map((user) => (
+      {users?.map((user) => (
         <UserCard key={user.id} user={user} />
       ))}
     </div>
@@ -96,9 +110,30 @@ export function SearchPage({
 
   return (
     <>
-      <Search onSearch={handleSearch} />
+      <Search onSearch={handleSearch} isLoading={isLoading} />
 
       <main className="results-container p-4">
+        {topUser && (
+          <div className="flex flex-wrap items-center gap-4 mb-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <img
+              src={topUser.avatar_url}
+              alt={`${topUser.login} avatar`}
+              className="w-16 h-16 rounded-full border"
+            />
+            <div>
+              <p className="text-sm text-gray-500">Top result</p>
+              <a
+                href={topUser.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-lg font-semibold text-blue-600 hover:underline"
+              >
+                {topUser.login}
+              </a>
+            </div>
+          </div>
+        )}
+
         {users.length > 0 && (
           <h2 className="text-xl font-bold mb-4">
             Found {totalCount} users. Displaying {users.length}.
@@ -128,7 +163,7 @@ export function SearchPage({
 // THE MAIN COMPONENT HANDLING EVERYTHING
 // ----------------------------------------------------------------------
 
-function Search() {
+function Search({ onSearch, isLoading }) {
   const initialSearchState = {
     keyword: "",
     location: "",
@@ -137,59 +172,14 @@ function Search() {
 
   const [formData, setFormData] = useState(initialSearchState);
 
-  // 1. State for the input field (Search's responsibility)
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // 2. State for the API response (App's original responsibility)
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  // 3. API Call Logic (githubService's original responsibility)
-  const fetchUserData = async (username) => {
-    setError(null);
-    setIsLoading(true);
-    setUser(null);
-
-    const url = `${GITHUB_API_BASE_URL}/users/${username}`;
-
-    try {
-      const response = await axios.get(url);
-      setUser(response.data);
-    } catch (err) {
-      if (err.response && err.response.status === 404) {
-        setError("Looks like we cant find the user.");
-      } else {
-        setError("An unexpected error occurred.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 4. Form Submission Handler (Search's original responsibility)
+  // 4. Form Submission Handler
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // Pass the entire state object to the parent's search handler
-    // Only search if at least one field is filled
     if (Object.values(formData).some((val) => val.trim())) {
-      fetchUserData(formData);
+      onSearch(formData);
     }
   };
-
-  // 5. Conditional Rendering Logic (SearchPage's original responsibility)
-  let content;
-
-  if (isLoading) {
-    content = <p>Loading...</p>;
-  } else if (error) {
-    content = <p style={{ color: "red" }}>{error}</p>;
-  } else if (user) {
-    content = <UserCard user={user} />;
-  } else {
-    content = <p>Start searching for a GitHub user!</p>;
-  }
 
   // Universal handler for all inputs
   const handleInputChange = (event) => {
@@ -200,7 +190,6 @@ function Search() {
     }));
   };
 
-  // 6. The return statement combines the form and the display area
   return (
     <div className="search-app-container">
       {/* Input Form */}
@@ -271,18 +260,13 @@ function Search() {
         <div className="mt-4 md:mt-0 md:col-span-4 flex justify-end">
           <button
             type="submit"
-            className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition duration-150"
+            disabled={isLoading}
+            className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition duration-150 disabled:bg-gray-400"
           >
-            Search GitHub Users
+            {isLoading ? "Searching..." : "Search GitHub Users"}
           </button>
         </div>
       </form>
-
-      {/* Results Display */}
-      <main className="results-container">
-        <h2>Search Result</h2>
-        {content}
-      </main>
     </div>
   );
 }

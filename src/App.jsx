@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
-import Search from "./components/Search";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { fetchUserData } from "./services/githubService";
-import UserCard from "./components/UserCard";
 import { SearchPage } from "./components/Search";
 import UserDetailPage from "./components/UserDetailPage";
 
@@ -16,11 +14,12 @@ function App() {
   const [lastSearchParams, setLastSearchParams] = useState({});
   const [totalCount, setTotalCount] = useState(0);
 
+  const date = new Date().getFullYear();
+
   const handleSearch = async (searchParams, page = 1) => {
     setSearchTerm(searchParams);
     setError(null);
     setIsLoading(true);
-    setUsers(null);
 
     if (page === 1) {
       setLastSearchParams(searchParams);
@@ -33,7 +32,7 @@ function App() {
 
       //Update the results: append new results if loading more
       setUsers((prevUsers) =>
-        page === 1 ? data.items : [...prevUsers, ...data.items]
+        page === 1 ? data.items : [...(prevUsers || []), ...data.items],
       );
 
       //Save the total number of users found
@@ -79,7 +78,7 @@ function App() {
       </BrowserRouter>
 
       <footer>
-        <p>&copy; 2025 GitHub Search App</p>
+        <p>&copy; {date} GitHub Search App</p>
       </footer>
     </div>
   );

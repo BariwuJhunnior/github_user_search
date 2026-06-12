@@ -7,7 +7,7 @@ function UserCard({ user }) {
   return (
     <div className="user-card">
       <img
-        src={user.avartar_url}
+        src={user.avatar_url}
         alt={`${user.login}'s avatar`}
         style={{ width: "100px", height: "100px", borderRadius: "50%" }}
       />
