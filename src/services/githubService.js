@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const GITHUB_BASE_URL = "https://api.github.com";
+const GITHUB_BASE_URL = import.meta.env.VITE_GITHUB_BASE_URL || "https://api.github.com";
 
 export const fetchUserProfile = async (username) => {
   const url = `${GITHUB_BASE_URL}/users/${username}`;

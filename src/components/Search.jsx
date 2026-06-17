@@ -1,92 +1,33 @@
-import { useState, useEffect } from "react";
-import { fetchUserProfile } from "../services/githubService";
+import SearchForm from "./SearchForm";
+import UserCard from "./UserCard";
 
-// --- Helper Component (kept inside for simplicity, still bad practice) ---
-function UserCard({ user }) {
-  
-
-  const [followers, setFollowers] = useState(
-    typeof user.followers === "number" ? user.followers : null,
-  );
-
-  useEffect(() => {
-    let mounted = true;
-    if (followers === null) {
-      fetchUserProfile(user.login)
-        .then((data) => {
-          if (mounted && typeof data.followers === "number") {
-            setFollowers(data.followers);
-          }
-        })
-        .catch(() => {});
-    }
-    return () => {
-      mounted = false;
-    };
-  }, [user.login, followers]);
-
-  if (!user) return null;
-
-  return (
-    <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white hover:shadow-lg transition duration-200">
-      <div className="flex items-center space-x-4">
-        <img
-          src={user.avatar_url}
-          alt={`${user.login}'s avatar`}
-          className="w-16 h-16 rounded-full"
-        />
-        <div>
-          <h3 className="text-xl font-semibold text-blue-600">{user.login}</h3>
-          <p className="text-sm text-gray-500">
-            Followers: {followers !== null ? followers : "—"}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-3">
-        <a
-          href={user.html_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 hover:text-blue-700 text-sm font-medium"
-        >
-          View Full Profile →
-        </a>
-      </div>
-    </div>
-  );
-}
-
-{
-  /* Search Page Components */
-}
 export function SearchPage({
-  users,
-  isLoading,
-  error,
+  users = [],
+  isLoading = false,
+  error = null,
   handleSearch,
-  totalCount,
+  totalCount = 0,
   handleLoadMore,
 }) {
-  const topUser = users?.length > 0 ? users[0] : null;
+  const safeUsers = Array.isArray(users) ? users : [];
+  const userCount = safeUsers.length;
+  const topUser = userCount > 0 ? safeUsers[0] : null;
 
-  //Renders the list of UserCard components
   const userList = (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-      {users?.map((user) => (
+      {safeUsers.map((user) => (
         <UserCard key={user.id} user={user} />
       ))}
     </div>
   );
 
-  //Results section
   let content;
 
-  if (isLoading && users.length === 0) {
+  if (isLoading && userCount === 0) {
     content = <p className="text-center text-lg mt-8">Loading...</p>;
   } else if (error) {
     content = <p className="text-center text-red-500 mt-8">Error: {error}</p>;
-  } else if (users.length > 0) {
+  } else if (userCount > 0) {
     content = userList;
   } else if (!isLoading && totalCount === 0) {
     content = (
@@ -102,11 +43,11 @@ export function SearchPage({
     );
   }
 
-  const showLoadMore = users.length > 0 && users.length < totalCount;
+  const showLoadMore = userCount > 0 && userCount < totalCount;
 
   return (
     <>
-      <Search onSearch={handleSearch} isLoading={isLoading} />
+      <SearchForm onSearch={handleSearch} isLoading={isLoading} />
 
       <main className="results-container p-4">
         {topUser && (
@@ -130,15 +71,14 @@ export function SearchPage({
           </div>
         )}
 
-        {users.length > 0 && (
+        {userCount > 0 && (
           <h2 className="text-xl font-bold mb-4">
-            Found {totalCount} users. Displaying {users.length}.
+            Found {totalCount} users. Displaying {userCount}.
           </h2>
         )}
 
         {content}
 
-        {/* Load More Button  */}
         {showLoadMore && (
           <div className="flex justify-center mt-6">
             <button
@@ -155,110 +95,5 @@ export function SearchPage({
   );
 }
 
-function Search({ onSearch, isLoading }) {
-  const initialSearchState = {
-    keyword: "",
-    location: "",
-    repos: "",
-  };
+export default SearchPage;
 
-  const [formData, setFormData] = useState(initialSearchState);
-
-  //Form Submission Handler
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    if (Object.values(formData).some((val) => val.trim())) {
-      onSearch(formData);
-    }
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  return (
-    <div className="search-app-container">
-      <form
-        onSubmit={handleSubmit}
-        className="p-4 bg-gray-100 rounded-lg shadow-md mb-6"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Keyword/Username Input */}
-          <div className="md:col-span-2">
-            <label
-              htmlFor="keyword"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Keyword / Username
-            </label>
-            <input
-              type="text"
-              id="keyword"
-              name="keyword"
-              placeholder="e.g., react, javascript, octocat"
-              value={formData.keyword}
-              onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
-
-          {/* Location Input */}
-          <div>
-            <label
-              htmlFor="location"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Location
-            </label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              placeholder="e.g., London, New York"
-              value={formData.location}
-              onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
-
-          {/* Min Repositories Input */}
-          <div>
-            <label
-              htmlFor="repos"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Min Repositories
-            </label>
-            <input
-              type="number"
-              id="repos"
-              name="repos"
-              placeholder="e.g., 10"
-              value={formData.repos}
-              onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        <div className="mt-4 md:mt-0 md:col-span-4 flex justify-end">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition duration-150 disabled:bg-gray-400"
-          >
-            {isLoading ? "Searching..." : "Search GitHub Users"}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-export default Search;
