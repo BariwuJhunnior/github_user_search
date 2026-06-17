@@ -1,62 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { fetchUserProfile, fetchUserRepos } from "../services/githubService";
-
-const RepoItem = ({ repo }) => (
-  <div>
-    <a
-      href={repo.html_url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-lg font-semibold text-blue-600 hover:text-blue-800"
-    >
-      {repo.name}
-    </a>
-
-    <p className="text-gray-600 text-sm mt-1">
-      {repo.description || "No description provided."}
-    </p>
-    <div className="flex items-center space-x-3 text-sm text-gray-500 mt-2">
-      <span>{repo.stargazers_count}</span>
-      <span>{repo.language}</span>
-    </div>
-  </div>
-);
-
-//Component: Profile Card
-const ProfileCard = ({ profile }) => (
-  <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col md:flex-row items-start md:space-x-8">
-    <img
-      src={profile.avartar_url}
-      alt={`${profile.login}'s avatar`}
-      className="w-32 h-32 rounded-full mb-4 md:mb-0 shadow-md"
-    />
-    <div>
-      <h1 className="text-3xl font-extrabold text-gray-800">
-        {profile.name || profile.login}
-      </h1>
-      <p className="text-xl text-blue-600 mb-3">{profile.login}</p>
-
-      {profile.bio && (
-        <p className="text-gray-700 italic mb-3">"{profile.bio}"</p>
-      )}
-
-      <div className="text-md text-gray-600 space-y-1">
-        {profile.location && <p>{profile.location}</p>}
-        <p>Public Repos: {profile.public_repos}</p>
-        <p>Followers: {profile.followers}</p>
-      </div>
-      <a
-        href={profile.html_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-4 inline-block px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 tansition"
-      >
-        View on GitHub
-      </a>
-    </div>
-  </div>
-);
+import RepoItem from "./RepoItem";
+import ProfileCard from "./ProfileCard";
 
 const UserDetailPage = () => {
   //Extract the dynamic URL parameter (the username)
@@ -96,7 +42,7 @@ const UserDetailPage = () => {
     return (
       <div className="p-8 text-center">
         <h2 className="text-xl font-semibold">
-          Loading user profileand repositories for {username}...
+          Loading user profile and repositories for {username}...
         </h2>
       </div>
     );
@@ -106,13 +52,13 @@ const UserDetailPage = () => {
     return (
       <div className="p-8 text-center text-red-500">
         <h2 className="text-2xl font-bold">Error</h2>
-        <p>{Error}</p>
+        <p>{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="p-8  space-y-8 bg-gray-50 min-h-screen">
+    <div className="p-8 space-y-8 bg-gray-50 min-h-screen">
       <ProfileCard profile={userProfile} />
 
       <div className="bg-white p-6 rounded-xl shadow-lg">
