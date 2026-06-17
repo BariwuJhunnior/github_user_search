@@ -48,7 +48,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1>GitHub User Search</h1>
+      <h1 className="mb-5">GitHub User Search</h1>
 
       <BrowserRouter>
         <Routes>
