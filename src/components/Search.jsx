@@ -3,7 +3,7 @@ import { fetchUserProfile } from "../services/githubService";
 
 // --- Helper Component (kept inside for simplicity, still bad practice) ---
 function UserCard({ user }) {
-  if (!user) return null;
+  
 
   const [followers, setFollowers] = useState(
     typeof user.followers === "number" ? user.followers : null,
@@ -24,6 +24,8 @@ function UserCard({ user }) {
       mounted = false;
     };
   }, [user.login, followers]);
+
+  if (!user) return null;
 
   return (
     <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white hover:shadow-lg transition duration-200">
