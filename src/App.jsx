@@ -46,6 +46,8 @@ function App() {
     handleSearch(lastSearchParams, currentPage + 1);
   };
 
+  const year  = new Date().getFullYear();
+
   return (
     <div className="app-container">
       <h1 className="mb-5">GitHub User Search</h1>
@@ -73,7 +75,7 @@ function App() {
       </BrowserRouter>
 
       <footer>
-        <p>&copy; 2025 GitHub User Search Application</p>
+        <p>&copy; {year} GitHub User Search Application</p>
       </footer>
     </div>
   );
