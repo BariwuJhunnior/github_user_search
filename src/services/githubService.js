@@ -9,7 +9,7 @@ export const fetchUserProfile = async (username) => {
     const response = await axios.get(url);
     return response.data;
   } catch (error) {
-    //Handling 404 for a user profile
+    //404 for a user profile not found
     if (error.response && error.response.status === 404) {
       throw new Error(`Profile for user '${username}' not found.`);
     }
