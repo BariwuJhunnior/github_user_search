@@ -75,7 +75,7 @@ function App() {
       </BrowserRouter>
 
       <footer>
-        <p>&copy; {year} GitHub User Search Application</p>
+        <p>&copy; 2025 - {year} GitHub User Search Application</p>
       </footer>
     </div>
   );
