@@ -70,6 +70,7 @@ export default function SearchForm({ onSearch, isLoading = false }) {
               id="repos"
               name="repos"
               placeholder="e.g., 10"
+              min="0"
               value={formData.repos}
               onChange={handleInputChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
